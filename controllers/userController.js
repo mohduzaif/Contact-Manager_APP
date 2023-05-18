@@ -2,6 +2,7 @@
 const expressAsyncHandler = require("express-async-handler");
 const userModel = require("../models/userModel");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 // @desc User Register Successfully
 // @route POST /api/users/register
@@ -61,9 +62,39 @@ const userRegister = expressAsyncHandler(async (req, res) => {
 // @route POST /api/users/login
 // @access public
 const userLogin = expressAsyncHandler(async (req, res) => {
-  res.json({
-    message: "User loggedIn Successfully",
-  });
+  const {email, password} = req.body;
+
+  // check if email or password is not empty
+  if(!email || !password) {
+    res.status(400);
+    throw new Error("All Fields are mandatory");
+  }
+
+  // check this user is present in database and compare the entered password with db password.
+  // if both are true then sent a response with an accessToken.
+  const loggedInUser = await userModel.findOne({email});
+  // console.log(loggedInUser);
+  if(loggedInUser && (await bcrypt.compare(password, loggedInUser.password))) {
+    
+    // now lets generate an accessToken.
+    let accessToken = jwt.sign({
+      user : {
+        username : loggedInUser.username,
+        email : loggedInUser.email,
+        id : loggedInUser.id,
+      },
+    }, process.env.ACCESS_TOKEN_SECRET_KEY, {expiresIn : "1m"});
+    
+    //Now we will sent this generated accessToken in response. 
+    res.status(200);
+    res.json({accessToken});
+
+  } else {
+    
+    res.status(401);
+    throw new Error("Email or password is not valid");
+    
+  }
 });
 
 // @desc Current User information
