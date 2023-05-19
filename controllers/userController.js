@@ -81,7 +81,7 @@ const userLogin = expressAsyncHandler(async (req, res) => {
       user : {
         username : loggedInUser.username,
         email : loggedInUser.email,
-        id : loggedInUser.id,
+        id : loggedInUser._id,
       },
     }, process.env.ACCESS_TOKEN_SECRET_KEY, {expiresIn : "1m"});
     
@@ -101,9 +101,7 @@ const userLogin = expressAsyncHandler(async (req, res) => {
 // @route GET /api/users/current
 // @access private (only logged In users can get the user information)
 const currentUser = expressAsyncHandler(async (req, res) => {
-  res.json({
-    message: "Current User information",
-  });
+  res.json(req.user);
 });
 
 module.exports = { userRegister, userLogin, currentUser };

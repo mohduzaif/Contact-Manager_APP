@@ -7,6 +7,8 @@ const {
   currentUser,
 } = require("../controllers/userController");
 
+const validateToken = require("../middleware/validateTokenHandler");
+
 userRouter
     .route("/register")
     .post(userRegister);
@@ -17,6 +19,6 @@ userRouter
 
 userRouter
     .route("/current")
-    .get(currentUser);
+    .get(validateToken, currentUser);
 
 module.exports = userRouter;
