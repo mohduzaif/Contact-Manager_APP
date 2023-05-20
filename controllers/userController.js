@@ -83,7 +83,7 @@ const userLogin = expressAsyncHandler(async (req, res) => {
         email : loggedInUser.email,
         id : loggedInUser._id,
       },
-    }, process.env.ACCESS_TOKEN_SECRET_KEY, {expiresIn : "1m"});
+    }, process.env.ACCESS_TOKEN_SECRET_KEY, {expiresIn : "15m"});
     
     //Now we will sent this generated accessToken in response. 
     res.status(200);

@@ -4,9 +4,10 @@ const contactModel = require("../models/contactModel");
 
 // @desc Get all contacts Successfully
 // @route GET /api/contacts
-// @access public
+// @access private
 const getContacts = expressAsyncHandler(async (req, res) => {
-  let contact = await contactModel.find();
+  // console.log(req.user);
+  let contact = await contactModel.find({user_id : req.user.id});
   // console.log(contact);
   // console.log(contact[0]._id);
   res.status(200).json({
@@ -17,7 +18,7 @@ const getContacts = expressAsyncHandler(async (req, res) => {
 
 // @desc Contact created Successfully
 // @route POST /api/contacts
-// @access public
+// @access private
 const createContact = expressAsyncHandler(async (req, res) => {
   // console.log("The request body is : ", req.body);
   let { name, email, phone } = req.body;
@@ -29,8 +30,9 @@ const createContact = expressAsyncHandler(async (req, res) => {
     name,
     email,
     phone,
+    user_id : req.user.id,
   });
-  console.log(userContact);
+  // console.log(userContact);
   res.status(201).json({
     message: "Contact Created Successfully",
   });
@@ -38,10 +40,10 @@ const createContact = expressAsyncHandler(async (req, res) => {
 
 // @desc Get contact
 // @route GET /api/contacts/:id
-// @access public
+// @access private
 const getIndividualContact = expressAsyncHandler(async (req, res) => {
   let currentContact = await contactModel.findById(req.params.id);
-  console.log(currentContact);
+  // console.log(currentContact);
   if (!currentContact) {
     res.status(404);
     throw new Error("Contact not Found");
@@ -55,7 +57,7 @@ const getIndividualContact = expressAsyncHandler(async (req, res) => {
 
 // @desc Update contact for ${req.params.id}
 // @route PUT /api/contacts/:id
-// @access public
+// @access private
 const updateContact = expressAsyncHandler(async (req, res) => {
   // Checked if contact is get or not.
   let currentContact = await contactModel.findById(req.params.id);
@@ -63,6 +65,12 @@ const updateContact = expressAsyncHandler(async (req, res) => {
     res.status(400).json({
       message: `Contact not Found for ${req.params.id}`,
     });
+  }
+
+  // check it is correct user that are update the contact.
+  if(currentContact.user_id.toString() !== req.user.id) {
+    res.status(403);
+    throw new Error("User don't have a permission to update other user contacts");
   }
 
   // update the contact.
@@ -80,7 +88,7 @@ const updateContact = expressAsyncHandler(async (req, res) => {
 
 // @desc Delete contact for ${req.params.id}
 // @route DELETE /api/contacts/:id
-// @access public
+// @access private
 const deleteContact = expressAsyncHandler(async (req, res) => {
   const currentContact = await contactModel.findById(req.params.id);
   // console.log(currentContact);
@@ -88,6 +96,13 @@ const deleteContact = expressAsyncHandler(async (req, res) => {
     res.status(404);
     throw new Error("Contact not found");
   }
+
+   // check it is correct user that are update the contact.
+   if(currentContact.user_id.toString() !== req.user.id) {
+    res.status(403);
+    throw new Error("User don't have a permission to delete other user contacts");
+  }
+
   let deletedMessage = await contactModel.deleteOne({ "_id": req.params.id });
   console.log(deletedMessage);
   res.status(200).json({

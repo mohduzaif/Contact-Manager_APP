@@ -1,24 +1,29 @@
-
 const mongoose = require("mongoose");
 
-const contactSchema = mongoose.Schema({
-    name : {
-        type : String,
-        required : [true, "Please add the contact name"]
+const contactSchema = mongoose.Schema(
+  {
+    user_id: {
+        type : mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref : "User"
     },
-    email : {
-        type : String,
-        required : [true, "Please add the contact email address"]
+    name: {
+      type: String,
+      required: [true, "Please add the contact name"],
     },
-    phone : {
-        type : String,
-        required : [true, "Please add the contact phone number"],
-        unique : true,
-    }
-},
-    {
-        timestamps : true,
-    }
+    email: {
+      type: String,
+      required: [true, "Please add the contact email address"],
+    },
+    phone: {
+      type: String,
+      required: [true, "Please add the contact phone number"],
+      unique: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
 );
 
 const contactModel = mongoose.model("Contact", contactSchema);
